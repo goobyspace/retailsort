@@ -49,7 +49,7 @@ end
 local function CanStack(itemArray, item)
     for key = 1, #itemArray, 1 do
         if itemArray[key]["itemID"] == item["itemID"] then
-            if itemArray[key]["currentStack"] + item["currentStack"] < item["maxStack"] then
+            if itemArray[key]["currentStack"] + item["currentStack"] <= item["maxStack"] then
                 main.utils.swap(item, itemArray[key]);
                 return true;
             end
