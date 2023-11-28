@@ -53,19 +53,14 @@ local function GetMount(itemName)
     local mountList = {};
     if main.faction == "Alliance" then
         mountList = { "Pinto Bridle", "Brown Horse Bridle", "Chestnut Mare Bridle", "Swift Brown Steed", "Swift Palomino",
-            "Swift White Steed", "Black Stallion Bridle",
-            "Brown Ram", "Gray Ram", "White Ram", "Swift Brown Ram", "Swift Gray Ram", "Swift White Ram",
-            "Swift Gray Ram",
-            "Swift White Ram", "Reins of the", "Mechanostrider",
+            "Swift White Steed", "Black Stallion Bridle", "Brown Ram", "Gray Ram", "White Ram", "Swift Brown Ram",
+            "Swift Gray Ram", "Swift White Ram", "Swift Gray Ram", "Swift White Ram", "Reins of the", "Mechanostrider",
             "Black War Steed Bridle", "Black War Ram", "Black Battlestrider", "Stormpike Battle Charger",
-            "Deathcharger's Reins", "Swift Razzashi Raptor", "Swift Zulian Tiger",
-            "Resonating Crystal", };
+            "Deathcharger's Reins", "Swift Razzashi Raptor", "Swift Zulian Tiger", "Resonating Crystal", };
     else
-        mountList = { "Horn of the", "Whistle of the", "Swift Blue Raptor", "Swift Olive Raptor", "Swift Orange Raptor",
-            "Skeletal Horse", "Skeletal Warhorse",
-            "Brown Kodo", "Gray Kodo", "Great White Kodo", "Black War Kodo", "Deathcharger's Reins",
-            "Swift Razzashi Raptor",
-            "Swift Zulian Tiger", "Resonating Crystal", }
+        mountList = { "Horn of the", "Whistle of the", "Swift Blue Raptor", "Swift Olive Raptor",
+            "Swift Orange Raptor", "Skeletal Horse", "Skeletal Warhorse", "Brown Kodo", "Gray Kodo", "Great White Kodo",
+            "Black War Kodo", "Deathcharger's Reins", "Swift Razzashi Raptor", "Swift Zulian Tiger", "Resonating Crystal", }
     end
     for key = 1, #mountList, 1 do
         if itemName:find(mountList[key]) then
@@ -88,8 +83,6 @@ local function GetItemArrayFromBags(bagArray)
             local currentBag = slotArray[slotKey]["currentBag"];
             local itemID = c.GetContainerItemID(currentBag, currentSlot);
             if itemID ~= nil then
-                local stats = GetItemStats(itemID);
-                print(stats);
                 itemAmount = itemAmount + 1;
                 local itemName, _, itemRarity, itemLevel, _, itemType, itemSubType, _, _, _, _, e, enum = GetItemInfo(
                     itemID);
