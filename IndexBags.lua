@@ -46,6 +46,18 @@ local function IsMount(itemName)
     return false;
 end
 
+local function CanStack(itemArray, item)
+    for key = 1, #itemArray, 1 do
+        if itemArray[key]["itemID"] == item["itemID"] then
+            if itemArray[key]["currentStack"] + item["currentStack"] < item["maxStack"] then
+                main.utils.swap(item, itemArray[key]);
+                return true;
+            end
+        end
+    end
+    return false;
+end
+
 main.index.getItemArrayFromBags = function(bagArray)
     local itemArray = {};
     local itemAmount = 0;
@@ -57,12 +69,13 @@ main.index.getItemArrayFromBags = function(bagArray)
         do
             local currentSlot = slotArray[slotKey]["currentSlot"];
             local currentBag = slotArray[slotKey]["currentBag"];
-            local itemID = c.GetContainerItemID(currentBag, currentSlot);
-            if itemID ~= nil then
+            local containerInfo = C_Container.GetContainerItemInfo(currentBag, currentSlot);
+            if containerInfo ~= nil then
+                local itemID = containerInfo["itemID"];
                 itemAmount = itemAmount + 1;
-                local itemName, _, itemRarity, itemLevel, _, itemType, itemSubType, _, _, _, _, e, enum = GetItemInfo(
-                    itemID);
-                table.insert(itemArray, {
+                local itemName, _, itemRarity, itemLevel, _, itemType, itemSubType, maxStack, _, _, _, e, enum =
+                    GetItemInfo(itemID);
+                local newItem = {
                     ["currentSlot"] = currentSlot,
                     ["currentBag"] = currentBag,
                     ["itemName"] = itemName,
@@ -72,7 +85,12 @@ main.index.getItemArrayFromBags = function(bagArray)
                     ["itemSubType"] = itemSubType,
                     ["itemID"] = itemID,
                     ["mount"] = IsMount(itemName),
-                });
+                    ["maxStack"] = maxStack,
+                    ["currentStack"] = containerInfo["stackCount"],
+                }
+                if not CanStack(itemArray, newItem) then
+                    table.insert(itemArray, newItem);
+                end
             end
         end
     end

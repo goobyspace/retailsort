@@ -12,15 +12,9 @@ local itemsToPush = {};
 local function SwapItems()
     if itemsToPush[1] then
         local item = itemsToPush[1];
-        local bag1, slot1, bag2, slot2 = item["currentBag"], item["currentSlot"], item["futureBag"], item["futureSlot"];
-        local _, _, locked1 = c.GetContainerItemInfo(bag1, slot1);
-        local _, _, locked2 = c.GetContainerItemInfo(bag2, slot2);
-        if locked1 ~= true and locked2 ~= true then --this is neccesary as the item can be either nil or false
-            ClearCursor()
-            c.PickupContainerItem(bag1, slot1)
-            c.PickupContainerItem(bag2, slot2)
-            table.remove(itemsToPush, 1);
-        end
+        local item2 = { ["currentBag"] = item["futureBag"], ["currentSlot"] = item["futureSlot"] }
+        main.utils.swap(item, item2);
+        table.remove(itemsToPush, 1);
     else
         events:UnregisterEvent("BAG_UPDATE_COOLDOWN");
         events:UnregisterEvent("BAG_UPDATE");
