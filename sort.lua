@@ -12,7 +12,7 @@ local c = C_Container;
 --+ the main bottleneck is actually moving the items anyway and just looping over arrays is really quick so it doesn't actually matter in the grand scheme of things
 local itemsToPush = {};
 
-function dump(o)
+local function dump(o)
    if type(o) == 'table' then
       local s = '{ '
       for k,v in pairs(o) do
@@ -34,7 +34,8 @@ local function GetBagSlots()
       local currentBag = c.GetContainerNumSlots(bagKey);
       local _, family = c.GetContainerNumFreeSlots(bagKey);
       local slotArray = {};
-      if currentBagSettingArray[bagKey+1]["ignore"] ~= true and family == 0 then
+      --fill up the bagarray with all the slots, if this is skipped bag will be considered a 0 slot bag
+      if currentBagSettingArray[bagKey+1]["ignore"] ~= true then
          for currentSlot = 1,currentBag, 1
          do
             totalSlots = totalSlots + 1;
@@ -71,6 +72,7 @@ local function GetItemArrayFromBags(bagArray)
                ["itemLevel"] = itemLevel,
                ["itemType"] = itemType,
                ["itemSubType"] = itemSubType,
+               ["itemID"] = itemID,
             });
          end
       end
@@ -80,7 +82,7 @@ end
 
 local function TypeChecker(typeString)
    --possible types: "Armor", "Consumable", "Container", "Gem", "Key", "Miscellaneous", "Money", "Reagent", "Recipe", "Projectile", "Quest", "Quiver", "Trade Goods", "Weapon"
-   local types = {"Consumable","Weapon","Armor","Trade Goods","Container","Gem","Key", "Money", "Reagent", "Recipe", "Projectile", "Quest", "Quiver", "Miscellaneous"}
+   local types = {"Quest", "Consumable","Weapon","Armor","Trade Goods","Container","Gem","Key", "Money", "Reagent", "Recipe", "Projectile", "Quiver", "Miscellaneous"}
    local returnNumb = nil;
    for key = 1, 14, 1
    do
@@ -207,17 +209,49 @@ local function itemArrayToBags(itemArray,bagArray)
    local orderedBags = {};
    for orderedKey = 1, 5, 1 do
       local bagType = currentBagSettingArray[orderedKey]["type"];
+      local _, bagFamily = c.GetContainerNumFreeSlots(orderedKey-1);--goes from 0-4 instead of 1-5
       local bagKey = orderedKey-1;
       local currentBag = bagArray[bagKey];
       local bagLength = #bagArray[bagKey]["slotArray"];
-      if bagType ~= nil and bagType ~= false then
+      if bagFamily ~= 0 then
          alteredBags = alteredBags + 1;
          table.insert(orderedBags,orderedKey,currentBag["currentBag"]);--this makes sure that the bags that are assigned slots are at the end of the array of bags
          local itemFound = nil;
          local sortKey = 1;
          for slotKey = 1, bagLength, 1
          do
-            local types = {["Consumable"] = "Consumable",["Weapon"] = "Equipment",["Armor"] = "Equipment",["Trade Goods"] = "Trade Goods"};
+            while true do --keep going until you find an item that hasn't been assigned yet or there are no more items
+               if itemArray[sortKey] and itemArray[sortKey]["Assigned"] == nil then
+                  local item = itemArray[sortKey];
+                  local itemFamily = GetItemFamily(item["itemID"]);
+                  if itemFound == true and itemFamily ~= bagFamily then
+                     break;
+                  elseif itemFamily == bagFamily then
+                     itemFound = true;
+                     if itemArray[sortKey] and itemArray[sortKey]["Assigned"] == nil and bagArray[bagKey]["slotArray"][slotKey]["Assigned"] == nil then
+                        itemArray[sortKey]["futureBag"] = bagKey;
+                        itemArray[sortKey]["futureSlot"] = slotKey;
+                        itemArray[sortKey]["Assigned"] = true;
+                        bagArray[bagKey]["slotArray"][slotKey]["Assigned"] = true;
+                        break;
+                     end
+                  end
+                  sortKey = sortKey + 1;
+               elseif itemArray[sortKey] and itemArray[sortKey]["Assigned"] == true then
+                  sortKey = sortKey + 1;
+               elseif itemArray[sortKey] == nil then
+                  break;
+               end
+            end
+         end
+      elseif bagType ~= nil and bagType ~= false then
+         alteredBags = alteredBags + 1;
+         table.insert(orderedBags,orderedKey,currentBag["currentBag"]);--this makes sure that the bags that are assigned slots are at the end of the array of bags
+         local itemFound = nil;
+         local sortKey = 1;
+         for slotKey = 1, bagLength, 1
+         do
+            local types = {["Quest"] = "Quest", ["Consumable"] = "Consumable",["Weapon"] = "Equipment",["Armor"] = "Equipment",["Trade Goods"] = "Trade Goods"};
             while true do --keep going until you find an item that hasn't been assigned yet or there are no more items
                if itemArray[sortKey] and itemArray[sortKey]["Assigned"] == nil then
                   local item = itemArray[sortKey];
@@ -251,23 +285,26 @@ local function itemArrayToBags(itemArray,bagArray)
    for orderedKey = 1, 5, 1--then we assign the items to specific slots for the future
    do
       local bagKey = orderedBags[orderedKey];
-      local currentBag = bagArray[bagKey]["slotArray"];
-      local bagLength = #currentBag;
-      for slotKey = 1, bagLength, 1
-      do
-         if bagArray[bagKey]["slotArray"][slotKey]["Assigned"] == nil then
-            while true do --keep going until you find an item that hasn't been assigned yet or there are no more items
-               if itemArray[sortKey] and itemArray[sortKey]["Assigned"] == nil then
-                  itemArray[sortKey]["futureBag"] = bagKey;
-                  itemArray[sortKey]["futureSlot"] = slotKey;
-                  itemArray[sortKey]["Assigned"] = true;
-                  bagArray[bagKey]["slotArray"][slotKey]["Assigned"] = true;
-                  sortKey = sortKey + 1;
-                  break;
-               elseif itemArray[sortKey] and itemArray[sortKey]["Assigned"] == true then
-                  sortKey = sortKey + 1;
-               else
-                  break;
+      local _, bagFamily = c.GetContainerNumFreeSlots(bagKey);--goes from 0-4 instead of 1-5
+      if bagFamily == 0 then
+         local currentBag = bagArray[bagKey]["slotArray"];
+         local bagLength = #currentBag;
+         for slotKey = 1, bagLength, 1
+         do
+            if bagArray[bagKey]["slotArray"][slotKey]["Assigned"] == nil then
+               while true do --keep going until you find an item that hasn't been assigned yet or there are no more items
+                  if itemArray[sortKey] and itemArray[sortKey]["Assigned"] == nil then
+                     itemArray[sortKey]["futureBag"] = bagKey;
+                     itemArray[sortKey]["futureSlot"] = slotKey;
+                     itemArray[sortKey]["Assigned"] = true;
+                     bagArray[bagKey]["slotArray"][slotKey]["Assigned"] = true;
+                     sortKey = sortKey + 1;
+                     break;
+                  elseif itemArray[sortKey] and itemArray[sortKey]["Assigned"] == true then
+                     sortKey = sortKey + 1;
+                  else
+                     break;
+                  end
                end
             end
          end
