@@ -3,11 +3,12 @@ main.ui = {}
 local ui = main.ui
 local menuFrame
 local currentBagSettingArray;
-local typeArray = {"Equipment", "Consumable", "Trade Goods"};
+local typeArray = {"Quest", "Equipment", "Consumable", "Trade Goods"};
 local typeIconArray = {
+    ["Quest"] = "inv_misc_pocketwatch_01",
     ["Consumable"] = "Inv_potion_93",
     ["Equipment"] = "Inv_chest_chain_05",
-    ["Trade Goods"] = "Inv_fabric_silk_02"
+    ["Trade Goods"] = "Inv_fabric_silk_02",
 };
 
 local function CreateTooltip(frame, tooltip)
@@ -37,31 +38,31 @@ local function CreateTooltip(frame, tooltip)
 end
 
 local function CreateMenu()
-    name = UnitName("player");
-    realm = GetRealmName();
+    local name = UnitName("player");
+    local realm = GetRealmName();
     currentBagSettingArray = bagSettingArray[name .. realm];
     local cleanUpButton = CreateFrame("Button", nil, ContainerFrame1);
-    cleanUpButton:SetWidth(22);
-    cleanUpButton:SetHeight(22);
+    cleanUpButton:SetWidth(18);
+    cleanUpButton:SetHeight(18);
 
     local cleanUpTexture = cleanUpButton:CreateTexture(nil, "BACKGROUND");
-    cleanUpTexture:SetTexture("interface\\icons\\Trade_engineering");
+    cleanUpTexture:SetTexture("interface\\icons\\inv_gizmo_06");
     cleanUpTexture:SetAllPoints(cleanUpButton);
     cleanUpButton.texture = cleanUpTexture;
 
-    cleanUpButton:SetPoint("TOPRIGHT", -10, -28)
+    cleanUpButton:SetPoint("TOPRIGHT", -10, -29)
     local cleanEnter, cleanLeave = CreateTooltip(cleanUpButton, "Cleanup Bags");
     cleanUpButton:SetScript("OnEnter", cleanEnter);
     cleanUpButton:SetScript("OnLeave", cleanLeave);
     cleanUpButton:SetScript("OnClick", function(self, event)
-        cleanUpButton:SetPoint("TOPRIGHT", -11, -29)
-        cleanUpButton:SetWidth(20);
-        cleanUpButton:SetHeight(20);
+        cleanUpButton:SetPoint("TOPRIGHT", -11, -30)
+        cleanUpButton:SetWidth(16);
+        cleanUpButton:SetHeight(16);
         main.sort.Sort();
         C_Timer.After(0.1, function()
-            cleanUpButton:SetPoint("TOPRIGHT", -10, -28)
-            cleanUpButton:SetWidth(22);
-            cleanUpButton:SetHeight(22);
+            cleanUpButton:SetPoint("TOPRIGHT", -10, -29)
+            cleanUpButton:SetWidth(18);
+            cleanUpButton:SetHeight(18);
         end)
     end);
     cleanUpButton:Show()
@@ -128,15 +129,15 @@ local function CreateMenu()
             GameTooltip:AddLine('<Click for Bag Settings>', 0, 1, 0, 1);
             GameTooltip:Show();
         end);
-        local timerHook = null;
+        local timerHook = nil;
         local function TimerCancel() -- this is laziness, because on retail it disappears if clicking outside the frame but it's waaaay easier to just do a timer
-            if timerHook ~= null then
+            if timerHook ~= nil then
                 timerHook:Cancel();
-                timerHook = null;
+                timerHook = nil;
             end
         end
         local function TimerStart()
-            if timerHook ~= null then timerHook:Cancel(); end
+            if timerHook ~= nil then timerHook:Cancel(); end
             timerHook = C_Timer.NewTicker(0.8, function()
                 optionsBG:Hide();
             end, 1);
@@ -163,7 +164,7 @@ local function CreateMenu()
         optionsBG:HookScript("OnLeave", TimerStart);
         currentPortrait:HookScript("OnClick", function()
             optionsBG:SetShown(not optionsBG:IsShown());
-            if timerHook ~= null then timerHook:Cancel(); end
+            if timerHook ~= nil then timerHook:Cancel(); end
             timerHook = C_Timer.NewTicker(1.8, function()
                 optionsBG:Hide();
             end, 1);
