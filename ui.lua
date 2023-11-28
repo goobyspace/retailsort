@@ -72,105 +72,122 @@ local function CreateMenu()
         ContainerFrame5PortraitButton
     }
     for key = 1, 5, 1 do
-        local currentPortrait = ContainerPortraits[key];
-        local bagType = currentBagSettingArray[key]["type"];
-        -- goes away when you click literally anywhere outside the menu
-        -- goes away when you bags are closed
-        local optionsBG = CreateFrame("Frame", nil, currentPortrait, "SortMenuBackdropTemplate");
-        optionsBG:SetPoint("BOTTOMLEFT");
-        optionsBG:SetBackdrop(
-            { -- despite filling this out in the XML template, we still need to fill it out here for it to work ?
-                bgFile = "Interface/Tooltips/UI-Tooltip-Background",
-                edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-                edgeSize = 16,
-                insets = { left = 4, right = 4, top = 4, bottom = 4 }
-            });
-        optionsBG:SetBackdropColor(0, 0, 0, 0.9);
+        local _, bagFamily = C_Container.GetContainerNumFreeSlots(key - 1);
+        if bagFamily == 0 then
+            local currentPortrait = ContainerPortraits[key];
+            local bagType = currentBagSettingArray[key]["type"];
+            -- goes away when you click literally anywhere outside the menu
+            -- goes away when you bags are closed
+            local optionsBG = CreateFrame("Frame", nil, currentPortrait, "SortMenuBackdropTemplate");
+            optionsBG:SetPoint("BOTTOMLEFT");
+            optionsBG:SetBackdrop(
+                { -- despite filling this out in the XML template, we still need to fill it out here for it to work ?
+                    bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+                    edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+                    edgeSize = 16,
+                    insets = { left = 4, right = 4, top = 4, bottom = 4 }
+                });
+            optionsBG:SetBackdropColor(0, 0, 0, 0.9);
 
-        local equipmentIcon = CreateFrame("Frame", nil, currentPortrait);
-        equipmentIcon:SetPoint("BOTTOMRIGHT", 7, 0);
-        equipmentIcon:SetSize(20, 20);
+            local equipmentIcon = CreateFrame("Frame", nil, currentPortrait);
+            equipmentIcon:SetPoint("BOTTOMRIGHT", 7, 0);
+            equipmentIcon:SetSize(20, 20);
 
-        local iconTexture = equipmentIcon:CreateTexture(nil, "BACKGROUND")
-        iconTexture:SetAllPoints();
+            local iconTexture = equipmentIcon:CreateTexture(nil, "BACKGROUND")
+            iconTexture:SetAllPoints();
 
-        local equipmentBorder = CreateFrame("Frame", nil, equipmentIcon);
-        equipmentBorder:SetPoint("CENTER");
-        equipmentBorder:SetSize(26, 26);
+            local equipmentBorder = CreateFrame("Frame", nil, equipmentIcon);
+            equipmentBorder:SetPoint("CENTER");
+            equipmentBorder:SetSize(26, 26);
 
-        local borderTexture = equipmentBorder:CreateTexture(nil, "BACKGROUND")
-        borderTexture:SetAllPoints();
-        borderTexture:SetTexture("interface/COMMON/RingBorder");
-        borderTexture:SetVertexColor(180 / 255, 180 / 255, 220 / 255);
-        equipmentIcon:Hide();
+            local borderTexture = equipmentBorder:CreateTexture(nil, "BACKGROUND")
+            borderTexture:SetAllPoints();
+            borderTexture:SetTexture("interface/COMMON/RingBorder");
+            borderTexture:SetVertexColor(180 / 255, 180 / 255, 220 / 255);
+            equipmentIcon:Hide();
 
-        local function setEquipmentIcon()
-            bagType = currentBagSettingArray[key]["type"]; -- incase it has been changed
-            iconTexture:SetTexture("interface/icons/" .. typeIconArray[bagType]);
-            equipmentIcon:Show();
-        end
-
-        local checkButtons = { optionsBG:GetChildren() };
-
-        if bagType ~= nil and bagType ~= false then
-            for _, child in ipairs(checkButtons) do
-                if child:GetName() == bagType .. "Check" then
-                    child:SetChecked(true);
-                end
+            local function setEquipmentIcon()
+                bagType = currentBagSettingArray[key]["type"]; -- incase it has been changed
+                iconTexture:SetTexture("interface/icons/" .. typeIconArray[bagType]);
+                equipmentIcon:Show();
             end
-            setEquipmentIcon();
+
+            local checkButtons = { optionsBG:GetChildren() };
+
+            if bagType ~= nil and bagType ~= false then
+                for _, child in ipairs(checkButtons) do
+                    if child:GetName() == bagType .. "Check" then
+                        child:SetChecked(true);
+                    end
+                end
+                setEquipmentIcon();
+                currentPortrait:HookScript("OnEnter", function()
+                    GameTooltip:AddDoubleLine("Assigned to", bagType, 1, 0.835, 0,
+                        1, 1, 1);
+                    GameTooltip:Show();
+                end);
+            end
             currentPortrait:HookScript("OnEnter", function()
-                GameTooltip:AddDoubleLine("Assigned to", bagType, 1, 0.835, 0,
-                    1, 1, 1);
+                GameTooltip:AddLine('<Click for Bag Settings>', 0, 1, 0, 1);
                 GameTooltip:Show();
             end);
-        end
-        currentPortrait:HookScript("OnEnter", function()
-            GameTooltip:AddLine('<Click for Bag Settings>', 0, 1, 0, 1);
-            GameTooltip:Show();
-        end);
-        local timerHook = nil;
-        local function TimerCancel() -- this is laziness, because on retail it disappears if clicking outside the frame but it's waaaay easier to just do a timer
-            if timerHook ~= nil then
-                timerHook:Cancel();
-                timerHook = nil;
-            end
-        end
-        local function TimerStart()
-            if timerHook ~= nil then timerHook:Cancel(); end
-            timerHook = C_Timer.NewTicker(0.8, function()
-                optionsBG:Hide();
-            end, 1);
-        end
-        for typeKey, child in ipairs(checkButtons) do
-            child:HookScript("OnEnter", TimerCancel);
-            child:HookScript("OnLeave", TimerStart);
-            child:HookScript("OnClick", function()
-                if child:GetChecked() == true then
-                    for checkTypeKey, checkChild in ipairs(checkButtons) do
-                        if checkTypeKey ~= typeKey then
-                            checkChild:SetChecked(false);
-                        end
-                    end
-                    currentBagSettingArray[key]["type"] = typeArray[typeKey];
-                    setEquipmentIcon();
-                else -- if its false that means it was true before
-                    currentBagSettingArray[key]["type"] = false;
-                    equipmentIcon:Hide();
+            local timerHook = nil;
+            local function TimerCancel() -- this is laziness, because on retail it disappears if clicking outside the frame but it's waaaay easier to just do a timer
+                if timerHook ~= nil then
+                    timerHook:Cancel();
+                    timerHook = nil;
                 end
+            end
+            local function TimerStart()
+                if timerHook ~= nil then timerHook:Cancel(); end
+                timerHook = C_Timer.NewTicker(0.8, function()
+                    optionsBG:Hide();
+                end, 1);
+            end
+            for typeKey, child in ipairs(checkButtons) do
+                child:HookScript("OnEnter", TimerCancel);
+                child:HookScript("OnLeave", TimerStart);
+                child:HookScript("OnClick", function()
+                    if child:GetChecked() == true then
+                        for checkTypeKey, checkChild in ipairs(checkButtons) do
+                            if checkTypeKey ~= typeKey then
+                                checkChild:SetChecked(false);
+                            end
+                        end
+                        currentBagSettingArray[key]["type"] = typeArray[typeKey];
+                        setEquipmentIcon();
+                    else -- if its false that means it was true before
+                        currentBagSettingArray[key]["type"] = false;
+                        equipmentIcon:Hide();
+                    end
+                end);
+            end
+            optionsBG:HookScript("OnEnter", TimerCancel);
+            optionsBG:HookScript("OnLeave", TimerStart);
+            currentPortrait:HookScript("OnClick", function()
+                optionsBG:SetShown(not optionsBG:IsShown());
+                if timerHook ~= nil then timerHook:Cancel(); end
+                timerHook = C_Timer.NewTicker(1.8, function()
+                    optionsBG:Hide();
+                end, 1);
+            end);
+            optionsBG:SetShown(false);
+        else
+            local currentPortrait = ContainerPortraits[key];
+            local clickCounter = 0; --displaying the text once would be probably better from a UX standpoint, but this is funny so im keeping it in
+            currentPortrait:HookScript("OnClick", function()
+                clickCounter = clickCounter + 1;
+                GameTooltip:AddLine('Bag settings only available for normal bags', 1,
+                    1 - (clickCounter / 15), 1 - (clickCounter / 7), 1);
+                GameTooltip:Show();
+            end);
+            currentPortrait:HookScript("OnLeave", function()
+                clickCounter = 0;
             end);
         end
-        optionsBG:HookScript("OnEnter", TimerCancel);
-        optionsBG:HookScript("OnLeave", TimerStart);
-        currentPortrait:HookScript("OnClick", function()
-            optionsBG:SetShown(not optionsBG:IsShown());
-            if timerHook ~= nil then timerHook:Cancel(); end
-            timerHook = C_Timer.NewTicker(1.8, function()
-                optionsBG:Hide();
-            end, 1);
-        end);
-        optionsBG:SetShown(false);
     end
 end
 
-function ui:MenuInit() CreateMenu(); end
+function ui:MenuInit()
+    CreateMenu();
+end
