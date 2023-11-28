@@ -51,11 +51,11 @@ local function VarChecker()
     main.realm = GetRealmName();
     main.faction = UnitFactionGroup("Player");
 
-    if BBagSettingArray == nil then
-        BBagSettingArray = {};
+    if BagSettingArray == nil then
+        BagSettingArray = {};
     end
-    if BBagSettingArray[main.name .. main.realm] == nil then
-        BBagSettingArray[main.name .. main.realm] = {
+    if BagSettingArray[main.name .. main.realm] == nil then
+        BagSettingArray[main.name .. main.realm] = {
             { ["type"] = false, ["ignore"] = false },
             { ["type"] = false, ["ignore"] = false },
             { ["type"] = false, ["ignore"] = false },
@@ -63,6 +63,8 @@ local function VarChecker()
             { ["type"] = false, ["ignore"] = false }
         };
     end
+
+    main.currentBagSettingArray = BagSettingArray[main.name .. main.realm];
 end
 
 local function DebugMode(debugMode)

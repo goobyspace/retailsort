@@ -2,7 +2,7 @@ local _, main = ...
 main.ui = {}
 local ui = main.ui
 local menuFrame
-local currentBagSettingArray;
+local currentBagSettingArray = main.currentBagSettingArray;
 local typeArray = { "Quest", "Equipment", "Consumable", "Trade Goods" };
 local typeIconArray = {
     ["Quest"] = "inv_misc_pocketwatch_01",
@@ -40,7 +40,7 @@ end
 local function CreateMenu()
     local name = UnitName("player");
     local realm = GetRealmName();
-    currentBagSettingArray = BBagSettingArray[name .. realm];
+    currentBagSettingArray = BagSettingArray[name .. realm];
     local cleanUpButton = CreateFrame("Button", nil, ContainerFrame1);
     cleanUpButton:SetWidth(18);
     cleanUpButton:SetHeight(18);

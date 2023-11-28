@@ -3,10 +3,11 @@
 ## Notes: Replicates the retail bag functionality
 ## Version: 1.0
 ## DefaultState: enabled
-## SavedVariables: BBagSettingArray
+## SavedVariables: BagSettingArray
 ## Author: @Gooby
 
-ui.lua
-sort.lua
-init.lua
-menuframe.xml
+IndexBags.lua
+Interface.lua
+Sort.lua
+Init.lua
+MenuFrame.xml
