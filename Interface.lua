@@ -2,7 +2,7 @@ local _, main = ...
 main.ui = {}
 local ui = main.ui
 local menuFrame
-local currentBagSettingArray = main.currentBagSettingArray;
+local currentBagSettingArray;
 local typeArray = { "Quest", "Equipment", "Consumable", "Trade Goods" };
 local typeIconArray = {
     ["Quest"] = "inv_misc_pocketwatch_01",
@@ -210,5 +210,6 @@ local function CreateMenu()
 end
 
 function ui:MenuInit()
+    local currentBagSettingArray = main.currentBagSettingArray;
     CreateMenu();
 end

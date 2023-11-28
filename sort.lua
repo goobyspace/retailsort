@@ -2,7 +2,6 @@ local _, main = ...;
 main.sort = {};
 local sort = main.sort;
 local events = CreateFrame("Frame");
-local currentBagSettingArray = main.currentBagSettingArray;
 local c = C_Container;
 --TODO: Stack combining
 
@@ -43,7 +42,7 @@ local function itemArrayToBags(itemArray, bagArray)
     local alteredBags = 0;
     local orderedBags = {};
     for orderedKey = 1, 5, 1 do
-        local bagType = currentBagSettingArray[orderedKey]["type"];
+        local bagType = main.currentBagSettingArray[orderedKey]["type"];
         local _, bagFamily = c.GetContainerNumFreeSlots(orderedKey - 1); --goes from 0-4 instead of 1-5
         local bagKey = orderedKey - 1;
         local currentBag = bagArray[bagKey];
@@ -200,8 +199,8 @@ local function itemArrayToBags(itemArray, bagArray)
 end
 
 function sort:Sort()
-    local bagArray, totalSlots = main.index.GetBagSlots();
-    local itemArray, totalItems = main.index.GetItemArrayFromBags(bagArray);
+    local bagArray, totalSlots = main.index.getBagSlots();
+    local itemArray, totalItems = main.index.getItemArrayFromBags(bagArray);
     local sortedArray = main.index.sortItemArray(itemArray);
     itemArrayToBags(sortedArray, bagArray);
 end
