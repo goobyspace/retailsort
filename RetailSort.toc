@@ -1,0 +1,12 @@
+## Interface: 11500
+## Title: Retail Sort
+## Notes: Replicates the retail bag functionality
+## Version: 1.0
+## DefaultState: enabled
+## SavedVariables: bagSettingArray
+## Author: @Gooby
+
+ui.lua
+sort.lua
+init.lua
+menuframe.xml

@@ -1,0 +1,104 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+   <Frame name="SortMenuBackdropTemplate" inherits="BackdropTemplate" virtual="true">
+      <Size>
+         <AbsDimension x="145" y="-107" />
+      </Size>
+      <Anchors>
+         <Anchor point="BOTTOMLEFT" />
+      </Anchors>
+      <Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
+         <EdgeSize val="16" />
+         <BackgroundInsets left="4" right="4" top="4" bottom="4" />
+      </Backdrop>
+      <Frames>
+         <CheckButton type="Equipment" name="EquipmentCheck" inherits="UIRadioButtonTemplate" checked="false">
+            <Size>
+               <AbsDimension x="16" y="16" />
+            </Size>
+            <Anchors>
+               <Anchor point="TOPLEFT">
+                  <Offset>
+                     <AbsDimension x="15" y="-35" />
+                  </Offset>
+               </Anchor>
+            </Anchors>
+         </CheckButton>
+         <CheckButton type="Consumable" name="ConsumableCheck" inherits="UIRadioButtonTemplate" checked="false">
+            <Size>
+               <AbsDimension x="16" y="16" />
+            </Size>
+            <Anchors>
+               <Anchor point="TOPLEFT">
+                  <Offset>
+                     <AbsDimension x="15" y="-55" />
+                  </Offset>
+               </Anchor>
+            </Anchors>
+         </CheckButton>
+         <CheckButton type="Trade Goods" name="Trade GoodsCheck" inherits="UIRadioButtonTemplate" checked="false">
+            <Size>
+               <AbsDimension x="16" y="16" />
+            </Size>
+            <Anchors>
+               <Anchor point="TOPLEFT">
+                  <Offset>
+                     <AbsDimension x="15" y="-75" />
+                  </Offset>
+               </Anchor>
+            </Anchors>
+         </CheckButton>
+      </Frames>
+      <Layers>
+         <Layer>
+            <FontString text="Assign to Bag:" font="Fonts\FRIZQT__.TTF" justifyH="LEFT" justifyV="TOP">
+               <Color r="1" g="0.835" b="0" a="1" />
+               <FontHeight val="12" />
+               <Size x="145" y="15" />
+               <Anchors>
+                  <Anchor point="TOP">
+                     <Offset>
+                        <AbsDimension x="15" y="-15" />
+                     </Offset>
+                  </Anchor>
+               </Anchors>
+            </FontString>
+            <FontString text="Equipment" font="Fonts\FRIZQT__.TTF" justifyH="LEFT" justifyV="TOP">
+               <Color r="1" g="1" b="1" a="1" />
+               <FontHeight val="12" />
+               <Size x="145" y="15" />
+               <Anchors>
+                  <Anchor point="TOP">
+                     <Offset>
+                        <AbsDimension x="36" y="-37" />
+                     </Offset>
+                  </Anchor>
+               </Anchors>
+            </FontString>
+            <FontString text="Consumables" font="Fonts\FRIZQT__.TTF" justifyH="LEFT" justifyV="TOP">
+               <Color r="1" g="1" b="1" a="1" />
+               <FontHeight val="12" />
+               <Size x="145" y="15" />
+               <Anchors>
+                  <Anchor point="TOP">
+                     <Offset>
+                        <AbsDimension x="36" y="-57" />
+                     </Offset>
+                  </Anchor>
+               </Anchors>
+            </FontString>
+            <FontString text="Trade Goods" font="Fonts\FRIZQT__.TTF" justifyH="LEFT" justifyV="TOP">
+               <Color r="1" g="1" b="1" a="1" />
+               <FontHeight val="12" />
+               <Size x="145" y="15" />
+               <Anchors>
+                  <Anchor point="TOP">
+                     <Offset>
+                        <AbsDimension x="36" y="-77" />
+                     </Offset>
+                  </Anchor>
+               </Anchors>
+            </FontString>
+         </Layer>
+      </Layers>
+   </Frame>
+</Ui>
