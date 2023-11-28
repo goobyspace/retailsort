@@ -54,11 +54,11 @@ local function VarChecker()
     end
     if bagSettingArray[name .. realm] == nil then
         bagSettingArray[name .. realm] = {
-            {["ignore"] = false},--1st one is backpack which can't have a type
-            {["type"] = false, ["ignore"] = false},
-            {["type"] = false, ["ignore"] = false},
-            {["type"] = false, ["ignore"] = false},
-            {["type"] = false, ["ignore"] = false}
+            { ["ignore"] = false }, --1st one is backpack which can't have a type
+            { ["type"] = false,  ["ignore"] = false },
+            { ["type"] = false,  ["ignore"] = false },
+            { ["type"] = false,  ["ignore"] = false },
+            { ["type"] = false,  ["ignore"] = false }
         };
     end
 end
@@ -71,17 +71,17 @@ local function DebugMode(debugMode)
         SLASH_FRAMESTK1 = "/fs"; -- For quicker access to frame stack
         SlashCmdList.FRAMESTK = function()
             LoadAddOn('Blizzard_DebugTools');
-             FrameStackTooltip_Toggle();
+            FrameStackTooltip_Toggle();
         end
 
         for i = 1, NUM_CHAT_WINDOWS do
-            _G["ChatFrame" ..i.. "EditBox"]:SetAltArrowKeyMode(false);
+            _G["ChatFrame" .. i .. "EditBox"]:SetAltArrowKeyMode(false);
         end
     end
 end
 
-function main:InitEventHandler (event, name)
-    if name ~= "RetailSort" then 
+function main:InitEventHandler(event, name)
+    if name ~= "RetailSort" then
         return;
     end
     VarChecker();
@@ -92,8 +92,10 @@ function main:InitEventHandler (event, name)
     DebugMode(true);
     main.ui.MenuInit();
     events:UnregisterEvent("ADDON_LOADED");
-
+    main.name = UnitName("player");
+    main.faction = UnitFactionGroup("Player");
+    main.realm = GetRealmName();
 end
 
 events:RegisterEvent("ADDON_LOADED");
-events:SetScript("OnEvent",main.InitEventHandler);
+events:SetScript("OnEvent", main.InitEventHandler);

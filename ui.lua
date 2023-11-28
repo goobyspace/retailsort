@@ -3,7 +3,7 @@ main.ui = {}
 local ui = main.ui
 local menuFrame
 local currentBagSettingArray;
-local typeArray = {"Quest", "Equipment", "Consumable", "Trade Goods"};
+local typeArray = { "Quest", "Equipment", "Consumable", "Trade Goods" };
 local typeIconArray = {
     ["Quest"] = "inv_misc_pocketwatch_01",
     ["Consumable"] = "Inv_potion_93",
@@ -76,14 +76,14 @@ local function CreateMenu()
         local bagType = currentBagSettingArray[key]["type"];
         -- goes away when you click literally anywhere outside the menu
         -- goes away when you bags are closed
-        local optionsBG = CreateFrame("Frame", nil, currentPortrait,"SortMenuBackdropTemplate");
+        local optionsBG = CreateFrame("Frame", nil, currentPortrait, "SortMenuBackdropTemplate");
         optionsBG:SetPoint("BOTTOMLEFT");
         optionsBG:SetBackdrop(
             { -- despite filling this out in the XML template, we still need to fill it out here for it to work ?
                 bgFile = "Interface/Tooltips/UI-Tooltip-Background",
                 edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
                 edgeSize = 16,
-                insets = {left = 4, right = 4, top = 4, bottom = 4}
+                insets = { left = 4, right = 4, top = 4, bottom = 4 }
             });
         optionsBG:SetBackdropColor(0, 0, 0, 0.9);
 
@@ -101,16 +101,16 @@ local function CreateMenu()
         local borderTexture = equipmentBorder:CreateTexture(nil, "BACKGROUND")
         borderTexture:SetAllPoints();
         borderTexture:SetTexture("interface/COMMON/RingBorder");
-        borderTexture:SetVertexColor(180/255, 180/255, 220/255);
+        borderTexture:SetVertexColor(180 / 255, 180 / 255, 220 / 255);
         equipmentIcon:Hide();
-        
+
         local function setEquipmentIcon()
             bagType = currentBagSettingArray[key]["type"]; -- incase it has been changed
             iconTexture:SetTexture("interface/icons/" .. typeIconArray[bagType]);
             equipmentIcon:Show();
         end
 
-        local checkButtons = {optionsBG:GetChildren()};
+        local checkButtons = { optionsBG:GetChildren() };
 
         if bagType ~= nil and bagType ~= false then
             for _, child in ipairs(checkButtons) do
@@ -121,7 +121,7 @@ local function CreateMenu()
             setEquipmentIcon();
             currentPortrait:HookScript("OnEnter", function()
                 GameTooltip:AddDoubleLine("Assigned to", bagType, 1, 0.835, 0,
-                                          1, 1, 1);
+                    1, 1, 1);
                 GameTooltip:Show();
             end);
         end
