@@ -6,6 +6,7 @@
 ## SavedVariables: BagSettingArray
 ## Author: @Gooby
 
+Utils.lua
 IndexBags.lua
 Interface.lua
 Sort.lua

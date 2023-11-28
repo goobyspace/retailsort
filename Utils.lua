@@ -1,4 +1,6 @@
 local _, main = ...;
+main.utils = {};
+
 main.utils.dump = function(o)
     if type(o) == 'table' then
         local s = '{ '
