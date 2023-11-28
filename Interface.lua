@@ -42,27 +42,27 @@ local function CreateMenu()
     local realm = GetRealmName();
     currentBagSettingArray = BagSettingArray[name .. realm];
     local cleanUpButton = CreateFrame("Button", nil, ContainerFrame1);
-    cleanUpButton:SetWidth(18);
-    cleanUpButton:SetHeight(18);
+    cleanUpButton:SetWidth(16);
+    cleanUpButton:SetHeight(16);
 
     local cleanUpTexture = cleanUpButton:CreateTexture(nil, "BACKGROUND");
-    cleanUpTexture:SetTexture("interface\\icons\\inv_gizmo_06");
+    cleanUpTexture:SetTexture("Interface/AddOns/RetailSort/inv_pet_broom");
     cleanUpTexture:SetAllPoints(cleanUpButton);
     cleanUpButton.texture = cleanUpTexture;
 
-    cleanUpButton:SetPoint("TOPRIGHT", -10, -29)
+    cleanUpButton:SetPoint("TOPRIGHT", -10, -30)
     local cleanEnter, cleanLeave = CreateTooltip(cleanUpButton, "Cleanup Bags");
     cleanUpButton:SetScript("OnEnter", cleanEnter);
     cleanUpButton:SetScript("OnLeave", cleanLeave);
     cleanUpButton:SetScript("OnClick", function(self, event)
-        cleanUpButton:SetPoint("TOPRIGHT", -11, -30)
-        cleanUpButton:SetWidth(16);
-        cleanUpButton:SetHeight(16);
+        cleanUpButton:SetPoint("TOPRIGHT", -11, -31)
+        cleanUpButton:SetWidth(14);
+        cleanUpButton:SetHeight(14);
         main.sort.Sort();
         C_Timer.After(0.1, function()
-            cleanUpButton:SetPoint("TOPRIGHT", -10, -29)
-            cleanUpButton:SetWidth(18);
-            cleanUpButton:SetHeight(18);
+            cleanUpButton:SetPoint("TOPRIGHT", -10, -30)
+            cleanUpButton:SetWidth(16);
+            cleanUpButton:SetHeight(16);
         end)
     end);
     cleanUpButton:Show()
