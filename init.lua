@@ -47,18 +47,20 @@ local function SlashCommandHandler(str)
 end
 
 local function VarChecker()
-    name = UnitName("player");
-    realm = GetRealmName();
-    if bagSettingArray == nil then
-        bagSettingArray = {};
+    main.name = UnitName("player");
+    main.realm = GetRealmName();
+    main.faction = UnitFactionGroup("Player");
+
+    if BBagSettingArray == nil then
+        BBagSettingArray = {};
     end
-    if bagSettingArray[name .. realm] == nil then
-        bagSettingArray[name .. realm] = {
-            { ["ignore"] = false }, --1st one is backpack which can't have a type
-            { ["type"] = false,  ["ignore"] = false },
-            { ["type"] = false,  ["ignore"] = false },
-            { ["type"] = false,  ["ignore"] = false },
-            { ["type"] = false,  ["ignore"] = false }
+    if BBagSettingArray[main.name .. main.realm] == nil then
+        BBagSettingArray[main.name .. main.realm] = {
+            { ["type"] = false, ["ignore"] = false },
+            { ["type"] = false, ["ignore"] = false },
+            { ["type"] = false, ["ignore"] = false },
+            { ["type"] = false, ["ignore"] = false },
+            { ["type"] = false, ["ignore"] = false }
         };
     end
 end
@@ -92,9 +94,6 @@ function main:InitEventHandler(event, name)
     DebugMode(true);
     main.ui.MenuInit();
     events:UnregisterEvent("ADDON_LOADED");
-    main.name = UnitName("player");
-    main.faction = UnitFactionGroup("Player");
-    main.realm = GetRealmName();
 end
 
 events:RegisterEvent("ADDON_LOADED");

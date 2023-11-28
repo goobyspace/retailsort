@@ -142,7 +142,6 @@ local function CompareItems(item, compareItem)
     elseif itemName == "Hearthstone" then
         return true;
     elseif mount then
-        print("yo");
         if compareMount then
             if rarity > compareItemRarity then
                 return true;
@@ -395,7 +394,7 @@ local function itemArrayToBags(itemArray, bagArray)
 end
 
 function sort:Sort()
-    currentBagSettingArray = bagSettingArray[main.name .. main.realm];
+    currentBagSettingArray = BBagSettingArray[main.name .. main.realm];
     local bagArray, totalSlots = GetBagSlots();
     local itemArray, totalItems = GetItemArrayFromBags(bagArray);
     local sortedArray = SortItemArray(itemArray);

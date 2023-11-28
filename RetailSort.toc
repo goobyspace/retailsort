@@ -3,7 +3,7 @@
 ## Notes: Replicates the retail bag functionality
 ## Version: 1.0
 ## DefaultState: enabled
-## SavedVariables: bagSettingArray
+## SavedVariables: BBagSettingArray
 ## Author: @Gooby
 
 ui.lua
