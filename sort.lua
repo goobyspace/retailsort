@@ -3,8 +3,6 @@ main.sort = {};
 local sort = main.sort;
 local events = CreateFrame("Frame");
 local c = C_Container;
---TODO: Stack combining
-
 -- there's a lot of inefficincies in this but the main bottleneck is actually moving the items anyway and
 -- just looping over arrays is really quick so it doesn't actually matter in the grand scheme of things
 local itemsToPush = {};
