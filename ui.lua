@@ -40,7 +40,7 @@ end
 local function CreateMenu()
     local name = UnitName("player");
     local realm = GetRealmName();
-    currentBagSettingArray = bagSettingArray[name .. realm];
+    currentBagSettingArray = BBagSettingArray[name .. realm];
     local cleanUpButton = CreateFrame("Button", nil, ContainerFrame1);
     cleanUpButton:SetWidth(18);
     cleanUpButton:SetHeight(18);
@@ -88,6 +88,12 @@ local function CreateMenu()
                     insets = { left = 4, right = 4, top = 4, bottom = 4 }
                 });
             optionsBG:SetBackdropColor(0, 0, 0, 0.9);
+
+            local optionsLine = optionsBG:CreateLine()
+            optionsLine:SetColorTexture(0.55, 0.55, 0.55);
+            optionsLine:SetThickness(1);
+            optionsLine:SetStartPoint("TOP", -60, -116)
+            optionsLine:SetEndPoint("TOP", 60, -116)
 
             local equipmentIcon = CreateFrame("Frame", nil, currentPortrait);
             equipmentIcon:SetPoint("BOTTOMRIGHT", 7, 0);
@@ -144,17 +150,32 @@ local function CreateMenu()
                     optionsBG:Hide();
                 end, 1);
             end
+
             for typeKey, child in ipairs(checkButtons) do
                 child:HookScript("OnEnter", TimerCancel);
                 child:HookScript("OnLeave", TimerStart);
                 child:HookScript("OnClick", function()
-                    if child:GetChecked() == true then
+                    local function WipeChecks()
                         for checkTypeKey, checkChild in ipairs(checkButtons) do
                             if checkTypeKey ~= typeKey then
                                 checkChild:SetChecked(false);
                             end
                         end
+                    end
+
+                    if typeKey == 5 then --key 5 is ignore
+                        if child:GetChecked() == true then
+                            WipeChecks();
+                            currentBagSettingArray[key]["type"] = false;
+                            currentBagSettingArray[key]["ignore"] = true;
+                            equipmentIcon:Hide();
+                        else
+                            currentBagSettingArray[key]["ignore"] = false;
+                        end
+                    elseif child:GetChecked() == true then
+                        WipeChecks();
                         currentBagSettingArray[key]["type"] = typeArray[typeKey];
+                        currentBagSettingArray[key]["ignore"] = false;
                         setEquipmentIcon();
                     else -- if its false that means it was true before
                         currentBagSettingArray[key]["type"] = false;

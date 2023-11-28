@@ -2,7 +2,7 @@
     xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
     <Frame name="SortMenuBackdropTemplate" inherits="BackdropTemplate" virtual="true">
         <Size>
-            <AbsDimension x="145" y="-127" />
+            <AbsDimension x="145" y="-152" />
         </Size>
         <Anchors>
             <Anchor point="BOTTOMLEFT" />
@@ -61,6 +61,19 @@
                     <Anchor point="TOPLEFT">
                         <Offset>
                             <AbsDimension x="15" y="-95" />
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </CheckButton>
+            <CheckButton type="Ignore" name="IgnoreCheck" inherits="UIRadioButtonTemplate"
+                checked="false">
+                <Size>
+                    <AbsDimension x="16" y="16" />
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT">
+                        <Offset>
+                            <AbsDimension x="15" y="-122" />
                         </Offset>
                     </Anchor>
                 </Anchors>
@@ -128,6 +141,18 @@
                         <Anchor point="TOP">
                             <Offset>
                                 <AbsDimension x="36" y="-97" />
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+                <FontString text="Ignore" font="Fonts\FRIZQT__.TTF" justifyH="LEFT" justifyV="TOP">
+                    <Color r="1" g="1" b="1" a="1" />
+                    <FontHeight val="12" />
+                    <Size x="145" y="15" />
+                    <Anchors>
+                        <Anchor point="TOP">
+                            <Offset>
+                                <AbsDimension x="36" y="-122" />
                             </Offset>
                         </Anchor>
                     </Anchors>
