@@ -6,6 +6,7 @@
 ## SavedVariables: BagSettingArray
 ## Author: @Gooby
 ## X-Curse-Project-ID: 944346
+## X-Wago-ID: bGoMzq60
 
 Utils.lua
 IndexBags.lua
