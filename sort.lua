@@ -31,17 +31,13 @@ local function itemArrayToBags(itemArray, bagArray)
         local currentSlot = item["currentSlot"];
         bagArray[currentBag]["slotArray"][currentSlot]["currentItem"] = key;
     end
-    local alteredBags = 0;
-    local orderedBags = {};
-    for orderedKey = 1, 5, 1 do
-        local bagType = main.currentBagSettingArray[orderedKey]["type"];
-        local _, bagFamily = c.GetContainerNumFreeSlots(orderedKey - 1); --goes from 0-4 instead of 1-5
+
+    local orderedBags = { [1] = 0, [2] = 1, [3] = 2, [4] = 3, [5] = 4 };
+    for orderedKey = 1, 5, 1 do --make sure to do the profession bags first
+        local _, bagFamily = c.GetContainerNumFreeSlots(orderedKey - 1);
         local bagKey = orderedKey - 1;
-        local currentBag = bagArray[bagKey];
         local bagLength = #bagArray[bagKey]["slotArray"];
         if bagFamily ~= 0 then
-            alteredBags = alteredBags + 1;
-            table.insert(orderedBags, orderedKey, currentBag["currentBag"]); --this makes sure that the bags that are assigned slots are at the end of the array of bags
             local itemFound = nil;
             local sortKey = 1;
             for slotKey = 1, bagLength, 1
@@ -70,13 +66,18 @@ local function itemArrayToBags(itemArray, bagArray)
                     end
                 end
             end
+        end
+    end
+    for orderedKey = 1, 5, 1 do -- now do the rest of the bags in the same way
+        local bagType = main.currentBagSettingArray[orderedKey]["type"];
+        local _, bagFamily = c.GetContainerNumFreeSlots(orderedKey - 1);
+        local bagKey = orderedKey - 1;
+        local bagLength = #bagArray[bagKey]["slotArray"];
+        if bagFamily ~= 0 then
         elseif bagType ~= nil and bagType ~= false then
-            alteredBags = alteredBags + 1;
-            table.insert(orderedBags, orderedKey, currentBag["currentBag"]); --this makes sure that the bags that are assigned slots are at the end of the array of bags
             local itemFound = nil;
             local sortKey = 1;
-            for slotKey = 1, bagLength, 1
-            do
+            for slotKey = 1, bagLength, 1 do
                 local types = {
                     ["Quest"] = "Quest",
                     ["Consumable"] = "Consumable",
@@ -109,8 +110,6 @@ local function itemArrayToBags(itemArray, bagArray)
                     end
                 end
             end
-        else
-            table.insert(orderedBags, orderedKey - alteredBags, currentBag["currentBag"]);
         end
     end
 

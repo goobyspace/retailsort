@@ -4,7 +4,7 @@
 ## Version: 1.0
 ## DefaultState: enabled
 ## SavedVariables: BagSettingArray
-## Author: Gooby
+## Author: @Gooby
 ## X-Curse-Project-ID: 944346
 ## X-Wago-ID: bGoMzq60
 

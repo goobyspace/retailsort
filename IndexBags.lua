@@ -8,7 +8,6 @@ main.index.getBagSlots = function()
     for bagKey = 0, 4, 1
     do
         local currentBag = c.GetContainerNumSlots(bagKey);
-        local _, family = c.GetContainerNumFreeSlots(bagKey);
         local slotArray = {};
         --fill up the bagarray with all the slots, if this is skipped bag will be considered a 0 slot bag
         if main.currentBagSettingArray[bagKey + 1]["ignore"] ~= true then
@@ -69,6 +68,7 @@ main.index.getItemArrayFromBags = function(bagArray)
         do
             local currentSlot = slotArray[slotKey]["currentSlot"];
             local currentBag = slotArray[slotKey]["currentBag"];
+            local _, family = c.GetContainerNumFreeSlots(slotArray[slotKey]["currentBag"]);
             local containerInfo = C_Container.GetContainerItemInfo(currentBag, currentSlot);
             if containerInfo ~= nil then
                 local itemID = containerInfo["itemID"];
@@ -87,6 +87,7 @@ main.index.getItemArrayFromBags = function(bagArray)
                     ["mount"] = IsMount(itemName),
                     ["maxStack"] = maxStack,
                     ["currentStack"] = containerInfo["stackCount"],
+                    ["correctFamily"] = family == GetItemFamily(itemID),
                 }
                 if not CanStack(itemArray, newItem) then
                     table.insert(itemArray, newItem);
@@ -124,11 +125,14 @@ local function CompareItems(item, compareItem)
     --this does not usually matter as generally the first letter is capitalized and nothing else
     --but it might be relevant if there's a multi word item that gets sorted weirdly
     -----------------------------------------------------
-    local itemName, itemType, subType, rarity, mount =
-        item["itemName"], item["itemType"], item["itemSubType"], item["itemRarity"], item["mount"];
-    local compareItemName, compareItemType, compareItemSubType, compareItemRarity, compareMount =
+    local itemName, itemType, subType, rarity, mount, family, slot, stack, bag =
+        item["itemName"], item["itemType"], item["itemSubType"], item["itemRarity"], item["mount"],
+        item["correctFamily"], item["currentSlot"], item["currentStack"], item["currentBag"];
+    local compareItemName, compareItemType, compareItemSubType, compareItemRarity, compareMount,
+    compareFamily, compareSlot, compareStack, compareBag =
         compareItem["itemName"], compareItem["itemType"], compareItem["itemSubType"], compareItem["itemRarity"],
-        compareItem["mount"];
+        compareItem["mount"], compareItem["correctFamily"], compareItem["currentSlot"], compareItem["currentStack"],
+        compareItem["currentBag"];
     local checkedType = TypeChecker(itemType);
     local checkedCompareType = TypeChecker(compareItemType);
     if compareItemName == "Hearthstone" then
@@ -165,7 +169,19 @@ local function CompareItems(item, compareItem)
                 elseif rarity == compareItemRarity then
                     if itemName < compareItemName then
                         return true;
-                    end;
+                    elseif itemName == compareItemName then
+                        if stack > compareStack then
+                            return true
+                        elseif stack == compareStack then
+                            if bag == compareBag then
+                                if slot < compareSlot then
+                                    return true;
+                                end
+                            elseif family then
+                                return true;
+                            end
+                        end
+                    end
                 end
             end
         end
