@@ -5,6 +5,7 @@
 ## DefaultState: enabled
 ## SavedVariables: BagSettingArray
 ## Author: @Gooby
+## X-Curse-Project-ID: 944346
 
 Utils.lua
 IndexBags.lua
