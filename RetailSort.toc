@@ -1,7 +1,7 @@
 ## Interface: 11500
 ## Title: Retail Sort
 ## Notes: Replicates the retail bag functionality
-## Version: 1.0
+## Version: 1.1
 ## DefaultState: enabled
 ## SavedVariables: BagSettingArray
 ## Author: @Gooby
