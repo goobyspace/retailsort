@@ -110,7 +110,7 @@ local function CreateMenu()
         bagFrames[key]["equipmentIcon"]:Hide();
 
         local function setEquipmentIcon()
-            bagType = main.currentBagSettingArray[key]["type"];  -- incase it has been changed
+            bagType = main.currentBagSettingArray[key]["type"]; -- incase it has been changed
             iconTexture:SetTexture("interface/icons/" .. typeIconArray[bagType]);
             if bagFrames[key]["bagFamily"] == 0 then
                 bagFrames[key]["equipmentIcon"]:Show();
@@ -127,13 +127,17 @@ local function CreateMenu()
             end
             setEquipmentIcon();
             currentPortrait:HookScript("OnEnter", function()
-                GameTooltip:AddDoubleLine("Assigned to", bagType, 1, 0.835, 0,
-                    1, 1, 1);
-                GameTooltip:Show();
+
             end);
         end
         currentPortrait:HookScript("OnEnter", function()
+            bagType = main.currentBagSettingArray[key]["type"];
             if bagFrames[key]["bagFamily"] == 0 then
+                if bagType ~= nil and bagType ~= false then
+                    GameTooltip:AddDoubleLine("Assigned to", bagType, 1, 0.835, 0,
+                        1, 1, 1);
+                    GameTooltip:Show();
+                end
                 GameTooltip:AddLine('<Click for Bag Settings>', 0, 1, 0, 1);
                 GameTooltip:Show();
             end
