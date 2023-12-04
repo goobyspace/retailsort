@@ -8,6 +8,11 @@ local c = C_Container;
 local itemsToPush = {};
 
 local function SwapItems()
+    if InCombatLockdown() then
+        main.ui.CombatBlock();
+        itemsToPush = {}; --clear the array, stop doing anything when we're in combat because otherwise we will break your bags to the point of having to relog
+        return
+    end
     if itemsToPush[1] then
         local item = itemsToPush[1];
         local item2 = { ["currentBag"] = item["futureBag"], ["currentSlot"] = item["futureSlot"] }

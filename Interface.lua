@@ -232,6 +232,13 @@ local function bagsChanged()
     end
 end
 
+function ui:CombatBlock()
+    GameTooltip:AddLine(
+        "Cannot be used in combat.",
+        1, 0.835, 0.5, 1);
+    GameTooltip:Show();
+end
+
 function ui:MenuInit()
     local event = CreateFrame("Frame");
     event:RegisterEvent("BAG_CONTAINER_UPDATE");
