@@ -1,4 +1,4 @@
-# queuesound
+# Retail Sort
 
 WoW Addon that replicates the retail sorting functionality for classic.
 
