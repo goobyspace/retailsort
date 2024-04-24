@@ -23,5 +23,6 @@ main.utils.swap = function(item1, item2)
         ClearCursor()
         C_Container.PickupContainerItem(bag1, slot1)
         C_Container.PickupContainerItem(bag2, slot2)
+        ClearCursor()
     end
 end

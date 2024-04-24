@@ -25,6 +25,8 @@ main.index.getBagSlots = function()
 end
 
 local function IsMount(itemName)
+    --the mount item type isnt for classic era mounts, just for ones like on retail that you 'learn' so we have to check the name
+    --should remove this check for cata
     local mountList = {};
     if main.faction == "Alliance" then
         mountList = { "Pinto Bridle", "Brown Horse Bridle", "Chestnut Mare Bridle", "Swift Brown Steed", "Swift Palomino",
@@ -99,12 +101,12 @@ main.index.getItemArrayFromBags = function(bagArray)
 end
 
 local function TypeChecker(typeString)
-    --possible types: "Armor", "Consumable", "Container", "Gem", "Key", "Miscellaneous", "Money", "Reagent", "Recipe", "Projectile", "Quest", "Quiver", "Trade Goods", "Weapon"
+    --possible types: "Armor", "Consumable", "Container", "Gem", "Key", "Miscellaneous", "Money", "Reagent", "Recipe", "Projectile", "Quest", "Quiver", "Trade Goods", "Weapon", "Permanent", "Glyph", "Battle Pets", "WoW Token", "Profession"
     local types = { "Quest", "Consumable", "Weapon", "Armor", "Trade Goods", "Container", "Gem", "Key", "Money",
-        "Reagent",
-        "Recipe", "Projectile", "Quiver", "Miscellaneous" }
-    local returnNumb = nil;
-    for key = 1, 14, 1
+        "Reagent", "Recipe", "Profession", "Glyph", "Battle Pets", "Projectile", "Quiver", "Miscellaneous", "Permanent",
+        "WoW Token" }
+    local returnNumb = 20;
+    for key = 1, 19, 1
     do
         if typeString == types[key] then
             returnNumb = key;

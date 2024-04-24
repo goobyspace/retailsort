@@ -191,6 +191,8 @@ local function itemArrayToBags(itemArray, bagArray)
             SwapItems();
         end);
         SwapItems(); --call it once to trigger the events
+    else
+        --put down items
     end
 end
 

@@ -1,4 +1,4 @@
-## Interface: 11502
+## Interface: 40400
 ## Title: Retail Sort
 ## Notes: Replicates the retail bag functionality
 ## Version: 1.4
