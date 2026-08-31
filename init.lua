@@ -94,6 +94,12 @@ function main:InitEventHandler(event, name)
     SLASH_QSound1 = "/RetailSort";
     SlashCmdList.QSound = SlashCommandHandler;
     DebugMode(true);
+
+    TargetFrame:SetScript("OnEvent", nil);
+    TargetFrame:Hide();
+    PlayerFrame:SetScript("OnEvent", nil);
+    PlayerFrame:Hide();
+
     main.ui.MenuInit();
     events:UnregisterEvent("ADDON_LOADED");
 end
