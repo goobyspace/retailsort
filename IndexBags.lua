@@ -179,7 +179,12 @@ local function CompareItems(item, compareItem)
                                 if slot < compareSlot then
                                     return true;
                                 end
-                            elseif family then
+                            elseif family ~= compareFamily then
+                                --prefer the item already in its correct family bag
+                                if family then
+                                    return true;
+                                end
+                            elseif bag < compareBag then
                                 return true;
                             end
                         end
