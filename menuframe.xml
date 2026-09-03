@@ -2,18 +2,13 @@
     xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
     <Frame name="SortMenuBackdropTemplate" inherits="BackdropTemplate" virtual="true">
         <Size>
-            <AbsDimension x="145" y="-152" />
+            <AbsDimension x="145" y="152" />
         </Size>
         <Anchors>
             <Anchor point="BOTTOMLEFT" />
         </Anchors>
-        <Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background"
-            edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
-            <EdgeSize val="16" />
-            <BackgroundInsets left="4" right="4" top="4" bottom="4" />
-        </Backdrop>
         <Frames>
-            <CheckButton type="Quest" name="QuestCheck" inherits="UIRadioButtonTemplate"
+            <CheckButton name="QuestCheck" inherits="UIRadioButtonTemplate"
                 checked="false">
                 <Size>
                     <AbsDimension x="16" y="16" />
@@ -26,7 +21,7 @@
                     </Anchor>
                 </Anchors>
             </CheckButton>
-            <CheckButton type="Equipment" name="EquipmentCheck" inherits="UIRadioButtonTemplate"
+            <CheckButton name="EquipmentCheck" inherits="UIRadioButtonTemplate"
                 checked="false">
                 <Size>
                     <AbsDimension x="16" y="16" />
@@ -39,7 +34,7 @@
                     </Anchor>
                 </Anchors>
             </CheckButton>
-            <CheckButton type="Consumable" name="ConsumableCheck" inherits="UIRadioButtonTemplate"
+            <CheckButton name="ConsumableCheck" inherits="UIRadioButtonTemplate"
                 checked="false">
                 <Size>
                     <AbsDimension x="16" y="16" />
@@ -52,7 +47,7 @@
                     </Anchor>
                 </Anchors>
             </CheckButton>
-            <CheckButton type="Trade Goods" name="Trade GoodsCheck" inherits="UIRadioButtonTemplate"
+            <CheckButton name="Trade GoodsCheck" inherits="UIRadioButtonTemplate"
                 checked="false">
                 <Size>
                     <AbsDimension x="16" y="16" />
@@ -65,7 +60,7 @@
                     </Anchor>
                 </Anchors>
             </CheckButton>
-            <CheckButton type="Ignore" name="IgnoreCheck" inherits="UIRadioButtonTemplate"
+            <CheckButton name="IgnoreCheck" inherits="UIRadioButtonTemplate"
                 checked="false">
                 <Size>
                     <AbsDimension x="16" y="16" />

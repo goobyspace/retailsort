@@ -47,18 +47,6 @@ local function IsMount(itemName)
     return false;
 end
 
-local function CanStack(itemArray, item)
-    for key = 1, #itemArray, 1 do
-        if itemArray[key]["itemID"] == item["itemID"] then
-            if itemArray[key]["currentStack"] + item["currentStack"] <= item["maxStack"] then
-                main.utils.swap(item, itemArray[key]);
-                return true;
-            end
-        end
-    end
-    return false;
-end
-
 main.index.getItemArrayFromBags = function(bagArray)
     local itemArray = {};
     local itemAmount = 0;
@@ -76,7 +64,7 @@ main.index.getItemArrayFromBags = function(bagArray)
                 local itemID = containerInfo["itemID"];
                 itemAmount = itemAmount + 1;
                 local itemName, _, itemRarity, itemLevel, _, itemType, itemSubType, maxStack, _, _, _, e, enum =
-                    GetItemInfo(itemID);
+                    C_Item.GetItemInfo(itemID);
                 local newItem = {
                     ["currentSlot"] = currentSlot,
                     ["currentBag"] = currentBag,
@@ -89,15 +77,72 @@ main.index.getItemArrayFromBags = function(bagArray)
                     ["mount"] = IsMount(itemName),
                     ["maxStack"] = maxStack,
                     ["currentStack"] = containerInfo["stackCount"],
-                    ["correctFamily"] = family == GetItemFamily(itemID),
+                    ["correctFamily"] = family == C_Item.GetItemFamily(itemID),
                 }
-                if not CanStack(itemArray, newItem) then
-                    table.insert(itemArray, newItem);
-                end
+                table.insert(itemArray, newItem);
             end
         end
     end
     return itemArray, itemAmount;
+end
+
+--merges are planned instead of performed, because a slot stays locked until the server confirms the
+--previous merge and any swap issued against it in the meantime is silently dropped
+main.index.planStackMerges = function(itemArray)
+    local moves = {};
+    local partialsByID = {};
+    local orderedIDs = {};
+    for key = 1, #itemArray, 1 do
+        local item = itemArray[key];
+        local maxStack = item["maxStack"] or 1;
+        if maxStack > 1 and item["currentStack"] < maxStack then
+            local itemID = item["itemID"];
+            if partialsByID[itemID] == nil then
+                partialsByID[itemID] = {};
+                table.insert(orderedIDs, itemID);
+            end
+            table.insert(partialsByID[itemID], key);
+        end
+    end
+
+    local absorbed = {};
+    for idKey = 1, #orderedIDs, 1 do
+        local partials = partialsByID[orderedIDs[idKey]];
+        while #partials > 1 do
+            table.sort(partials, function(a, b)
+                return itemArray[a]["currentStack"] > itemArray[b]["currentStack"];
+            end);
+            --emptying the smallest stack first costs one move per stack removed, which is the minimum
+            local source = itemArray[partials[#partials]];
+            local targetKey = nil;
+            for key = 1, #partials - 1, 1 do
+                local target = itemArray[partials[key]];
+                if target["currentStack"] + source["currentStack"] <= target["maxStack"] then
+                    targetKey = key;
+                    break;
+                end
+            end
+            if targetKey == nil then
+                break; --nothing can hold the smallest stack, so nothing can hold the bigger ones either
+            end
+            local target = itemArray[partials[targetKey]];
+            table.insert(moves, {
+                { ["currentBag"] = source["currentBag"], ["currentSlot"] = source["currentSlot"] },
+                { ["currentBag"] = target["currentBag"], ["currentSlot"] = target["currentSlot"] },
+            });
+            target["currentStack"] = target["currentStack"] + source["currentStack"];
+            absorbed[partials[#partials]] = true;
+            table.remove(partials, #partials);
+        end
+    end
+
+    local remaining = {};
+    for key = 1, #itemArray, 1 do
+        if absorbed[key] == nil then
+            table.insert(remaining, itemArray[key]);
+        end
+    end
+    return remaining, moves;
 end
 
 local function TypeChecker(typeString)

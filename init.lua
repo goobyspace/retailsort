@@ -5,10 +5,24 @@ main.commands = {
     ["sort"] = function()
         main.sort.Sort();
     end,
+    ["debug"] = function()
+        local dump = main.utils.getBagLayoutDebugDump();
+        main.ui:ShowDebugDump(dump);
+        print("|cff00cc66Retail Sort debug dump opened in a window.|r");
+    end,
+    ["bagdebug"] = function()
+        main.commands.debug();
+    end,
+    ["restore"] = function()
+        main.ui:ShowDebugInput();
+        print("|cff00cc66Retail Sort:|r paste a debug dump into the window, then press Restore This Layout.");
+    end,
     ["help"] = function()
         print(" ");
         print("Retail Sort Help");
         print("|cff00cc66/retailsort sort|r - sorts your bags");
+        print("|cff00cc66/retailsort debug|r - copies the current bag layout to the clipboard");
+        print("|cff00cc66/retailsort restore|r - moves items back into a pasted bag layout (debug)");
         print("|cff00cc66/retailsort config|r - shows config menu");
         print("|cff00cc66/retailsort help|r - shows help info");
         print(" ");

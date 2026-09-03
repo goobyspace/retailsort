@@ -239,6 +239,102 @@ function ui:CombatBlock()
     GameTooltip:Show();
 end
 
+function ui:CreateDebugWindow()
+    if self.debugWindow then
+        return self.debugWindow;
+    end
+
+    local frame = CreateFrame("Frame", "RetailSortDebugWindow", UIParent, "BackdropTemplate");
+    frame:SetSize(620, 420);
+    frame:SetPoint("CENTER");
+    frame:SetBackdrop({
+        bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+        edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+        edgeSize = 16,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+    });
+    frame:SetBackdropColor(0.05, 0.05, 0.08, 0.95);
+    frame:SetMovable(true);
+    frame:EnableMouse(true);
+    frame:RegisterForDrag("LeftButton");
+    frame:SetScript("OnDragStart", function(self)
+        self:StartMoving();
+    end);
+    frame:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing();
+    end);
+    frame:SetClampedToScreen(true);
+
+    local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge");
+    title:SetPoint("TOP", 0, -14);
+    title:SetText("Retail Sort Debug");
+
+    local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton");
+    close:SetPoint("TOPRIGHT", -8, -8);
+    close:SetScript("OnClick", function()
+        frame:Hide();
+    end);
+
+    local scroll = CreateFrame("ScrollFrame", nil, frame, "UIPanelScrollFrameTemplate");
+    scroll:SetPoint("TOPLEFT", 12, -32);
+    scroll:SetPoint("BOTTOMRIGHT", -12, 40);
+
+    local restore = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate");
+    restore:SetSize(160, 22);
+    restore:SetPoint("BOTTOMRIGHT", -12, 12);
+    restore:SetText("Restore This Layout");
+    restore:SetScript("OnClick", function()
+        local layout, info = main.utils.parseBagLayoutDump(frame.editBox:GetText());
+        if layout == nil then
+            print("|cffff5555Retail Sort restore:|r " .. tostring(info));
+            return;
+        end
+        frame:Hide();
+        main.sort:Restore(layout);
+    end);
+
+    local hint = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall");
+    hint:SetPoint("BOTTOMLEFT", 14, 18);
+    hint:SetText("Paste a dump and press Restore to move items back into that layout.");
+
+    local editBox = CreateFrame("EditBox", nil, scroll);
+    editBox:SetMultiLine(true);
+    editBox:SetFontObject(ChatFontNormal);
+    editBox:SetTextInsets(8, 8, 8, 8);
+    editBox:SetAutoFocus(false);
+    editBox:SetTextColor(1, 1, 1, 1);
+    editBox:SetCursorPosition(0);
+    editBox:SetScript("OnEscapePressed", function(self)
+        self:ClearFocus();
+    end);
+    editBox:SetScript("OnTextChanged", function(self)
+        self:SetCursorPosition(0);
+    end);
+    editBox:SetWidth(scroll:GetWidth() - 24);
+    editBox:SetHeight(1000);
+    scroll:SetScrollChild(editBox);
+
+    frame.editBox = editBox;
+    frame:Hide();
+    self.debugWindow = frame;
+    return frame;
+end
+
+function ui:ShowDebugDump(text)
+    local frame = self:CreateDebugWindow();
+    frame.editBox:SetText(text or "");
+    frame.editBox:HighlightText();
+    frame.editBox:SetCursorPosition(0);
+    frame:Show();
+end
+
+function ui:ShowDebugInput()
+    local frame = self:CreateDebugWindow();
+    frame.editBox:SetText("");
+    frame.editBox:SetFocus();
+    frame:Show();
+end
+
 function ui:MenuInit()
     local event = CreateFrame("Frame");
     event:RegisterEvent("BAG_CONTAINER_UPDATE");
