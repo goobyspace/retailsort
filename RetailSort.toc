@@ -8,9 +8,10 @@
 ## X-Curse-Project-ID: 944346
 ## X-Wago-ID: bGoMzq60
 
-Utils.lua
-IndexBags.lua
-Interface.lua
-Sort.lua
+code/WowApi.lua
+code/Utils.lua
+code/IndexBags.lua
+code/Interface.lua
+code/Sort.lua
 Init.lua
 MenuFrame.xml

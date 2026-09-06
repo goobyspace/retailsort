@@ -24,10 +24,10 @@ local function CreateTooltip(frame, tooltip)
 
     return function(self, event)
         GameTooltip:SetOwner(self, "ANCHOR_LEFT");
-        GameTooltip:AddLine('Clean Up Bags', 1, 1, 1, 1);
+        GameTooltip:AddLine('Clean Up Bags', 1, 1, 1, true);
         GameTooltip:AddLine(
             "Auto-sorts your inventory to make room for new items. You can assign an item type to a specific bag by clicking the bag's top-left icon.",
-            1, 0.835, 0, 1);
+            1, 0.835, 0, true);
         GameTooltip:Show();
         texture:SetAlpha(0.25);
     end, function(self, event)
@@ -138,7 +138,7 @@ local function CreateMenu()
                         1, 1, 1);
                     GameTooltip:Show();
                 end
-                GameTooltip:AddLine('<Click for Bag Settings>', 0, 1, 0, 1);
+                GameTooltip:AddLine('<Click for Bag Settings>', 0, 1, 0, true);
                 GameTooltip:Show();
             end
         end);
@@ -206,7 +206,7 @@ local function CreateMenu()
             if bagFrames[key]["bagFamily"] ~= 0 then
                 clickCounter = clickCounter + 1;
                 GameTooltip:AddLine('Bag settings only available for normal bags', 1,
-                    1 - (clickCounter / 15), 1 - (clickCounter / 7), 1);
+                    1 - (clickCounter / 15), 1 - (clickCounter / 7), true);
                 GameTooltip:Show();
             end
         end);
@@ -235,7 +235,7 @@ end
 function ui:CombatBlock()
     GameTooltip:AddLine(
         "Cannot be used in combat.",
-        1, 0.835, 0.5, 1);
+        1, 0.835, 0.5, true);
     GameTooltip:Show();
 end
 

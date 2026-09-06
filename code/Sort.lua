@@ -1,8 +1,8 @@
 local _, main = ...;
 main.sort = {};
 local sort = main.sort;
-local events = CreateFrame("Frame");
-local c = C_Container;
+local trace = main.trace;
+local events = main.wow.CreateFrame("Frame");
 -- there's a lot of inefficincies in this but the main bottleneck is actually moving the items anyway and
 -- just looping over arrays is really quick so it doesn't actually matter in the grand scheme of things
 --the plan is a list of waves; every swap inside a wave touches slots no other swap in that wave touches,
@@ -20,6 +20,7 @@ local planOnFinish = nil;
 local MAX_LOCK_RETRIES = 20;
 local MAX_SORT_PASSES = 10;
 local MAX_SETTLE_TRIES = 30;
+local tracePass = 0;
 local RunSort; --defined below, the planner it needs lives between here and there
 local RunWave;
 
@@ -62,9 +63,9 @@ end
 
 local function AnySlotLocked()
     for bagKey = 0, 4, 1 do
-        local slots = c.GetContainerNumSlots(bagKey) or 0;
+        local slots = main.wow.GetContainerNumSlots(bagKey) or 0;
         for slotKey = 1, slots, 1 do
-            local info = c.GetContainerItemInfo(bagKey, slotKey);
+            local info = main.wow.GetContainerItemInfo(bagKey, slotKey);
             if info ~= nil and info["isLocked"] == true then
                 return true;
             end
@@ -88,7 +89,7 @@ local function WhenSettled(callback)
             return
         end
         tries = tries + 1;
-        C_Timer.After(0.1, attempt);
+        main.wow.After(0.1, attempt);
     end
     attempt();
 end
@@ -143,6 +144,20 @@ end
 
 local function StartPlan(onFinish)
     if planLength > 0 then
+        if trace:IsActive() then
+            trace:AddFormat('  planned %d wave(s):', planLength);
+            for wave = 1, planLength, 1 do
+                local moves = movePlan[wave];
+                if moves ~= nil then
+                    trace:AddFormat('    wave %d (%d move(s)):', wave, #moves);
+                    for key = 1, #moves, 1 do
+                        local move = moves[key];
+                        trace:AddFormat('      [%d,%d] <-> [%d,%d]', move[1]["currentBag"], move[1]["currentSlot"],
+                            move[2]["currentBag"], move[2]["currentSlot"]);
+                    end
+                end
+            end
+        end
         planOnFinish = onFinish;
         events:RegisterEvent("BAG_UPDATE_COOLDOWN");
         events:RegisterEvent("BAG_UPDATE");
@@ -151,7 +166,9 @@ local function StartPlan(onFinish)
         end);
         RunWave(); --call it once to trigger the events
     else
+        trace:Add('  nothing to move, bags already sorted');
         sortPasses = 0;
+        main.sort.TraceFinish('bags already in the desired order');
     end
 end
 
@@ -161,18 +178,22 @@ local function FinishPlan()
     StopListening();
     ClearPlan();
     if moved > 0 and onFinish ~= nil then
-        onFinish();     --a refused or interrupted swap can leave items behind, so verify by planning again
+        trace:AddFormat('  wave execution done, %d swap(s) issued, running a verification pass', moved);
+        onFinish(); --a refused or interrupted swap can leave items behind, so verify by planning again
     else
+        trace:Add('  wave execution done, no swap was issued, stopping');
         sortPasses = 0; --nothing moved, so another pass would only plan the exact same swaps again
+        main.sort.TraceFinish('a pass issued no swaps');
     end
 end
 
 RunWave = function()
-    if InCombatLockdown() then
+    if main.wow.InCombatLockdown() then
         main.ui.CombatBlock();
         StopListening();
         ClearPlan(); --stop doing anything when we're in combat because otherwise we will break your bags to the point of having to relog
         sortPasses = 0;
+        main.sort.TraceFinish('entered combat');
         return
     end
     while waveKey <= planLength and movePlan[waveKey] == nil do
@@ -183,6 +204,7 @@ RunWave = function()
         return
     end
     local wave = movePlan[waveKey];
+    trace:AddFormat('    running wave %d (%d move(s), attempt %d):', waveKey, #wave, lockRetries + 1);
     local locked = {};
     for key = 1, #wave, 1 do
         local move = wave[key];
@@ -200,12 +222,14 @@ RunWave = function()
     end
     movePlan[waveKey] = locked; --slots that were locked get retried, the rest of the wave is done
     lockRetries = lockRetries + 1;
+    trace:AddFormat('      %d move(s) were locked, retry %d of %d', #locked, lockRetries, MAX_LOCK_RETRIES);
     if lockRetries > MAX_LOCK_RETRIES then
+        trace:Add('      giving up on this wave, too many locked retries');
         FinishPlan();
     elseif #locked == #wave then
         --nothing moved, so no BAG_UPDATE is coming to drive the next attempt
         local generation = planGeneration;
-        C_Timer.After(0.1, function()
+        main.wow.After(0.1, function()
             if generation == planGeneration then
                 RunWave();
             end
@@ -221,7 +245,7 @@ local function itemArrayToBags(itemArray, bagArray, mergeMoves)
 
     local orderedBags = { [1] = 0, [2] = 1, [3] = 2, [4] = 3, [5] = 4 };
     for orderedKey = 1, 5, 1 do --make sure to do the profession bags first
-        local _, bagFamily = c.GetContainerNumFreeSlots(orderedKey - 1);
+        local _, bagFamily = main.wow.GetContainerNumFreeSlots(orderedKey - 1);
         local bagKey = orderedKey - 1;
         local bagLength = #bagArray[bagKey]["slotArray"];
         if bagFamily ~= 0 then
@@ -232,7 +256,7 @@ local function itemArrayToBags(itemArray, bagArray, mergeMoves)
                 while true do --keep going until you find an item that hasn't been assigned yet or there are no more items
                     if itemArray[sortKey] and itemArray[sortKey]["Assigned"] == nil then
                         local item = itemArray[sortKey];
-                        local itemFamily = C_Item.GetItemFamily(item["itemID"]);
+                        local itemFamily = main.wow.GetItemFamily(item["itemID"]);
                         if itemFound == true and itemFamily ~= bagFamily then
                             break;
                         elseif itemFamily == bagFamily then
@@ -257,7 +281,7 @@ local function itemArrayToBags(itemArray, bagArray, mergeMoves)
     end
     for orderedKey = 1, 5, 1 do -- now do the rest of the bags in the same way
         local bagType = main.currentBagSettingArray[orderedKey]["type"];
-        local _, bagFamily = c.GetContainerNumFreeSlots(orderedKey - 1);
+        local _, bagFamily = main.wow.GetContainerNumFreeSlots(orderedKey - 1);
         local bagKey = orderedKey - 1;
         local bagLength = #bagArray[bagKey]["slotArray"];
         if bagFamily ~= 0 then
@@ -304,7 +328,7 @@ local function itemArrayToBags(itemArray, bagArray, mergeMoves)
     for orderedKey = 1, 5, 1 --then we assign the items to specific slots for the future
     do
         local bagKey = orderedBags[orderedKey];
-        local _, bagFamily = c.GetContainerNumFreeSlots(bagKey); --goes from 0-4 instead of 1-5
+        local _, bagFamily = main.wow.GetContainerNumFreeSlots(bagKey); --goes from 0-4 instead of 1-5
         if bagFamily == 0 then
             local currentBag = bagArray[bagKey]["slotArray"];
             local bagLength = #currentBag;
@@ -330,32 +354,94 @@ local function itemArrayToBags(itemArray, bagArray, mergeMoves)
         end
     end
 
+    if trace:IsActive() then
+        trace:Add('  slot assignments (item -> target slot):');
+        for key = 1, #itemArray, 1 do
+            local item = itemArray[key];
+            if item["futureBag"] == nil then
+                trace:AddFormat('    %s x%d at [%d,%d] -> NO TARGET ASSIGNED', tostring(item["itemName"]),
+                    item["currentStack"], item["currentBag"], item["currentSlot"]);
+            elseif item["futureBag"] == item["currentBag"] and item["futureSlot"] == item["currentSlot"] then
+                trace:AddFormat('    %s x%d at [%d,%d] -> stays put', tostring(item["itemName"]),
+                    item["currentStack"], item["currentBag"], item["currentSlot"]);
+            else
+                trace:AddFormat('    %s x%d at [%d,%d] -> [%d,%d]', tostring(item["itemName"]), item["currentStack"],
+                    item["currentBag"], item["currentSlot"], item["futureBag"], item["futureSlot"]);
+            end
+        end
+    end
+
     --walk the permutation cycle by cycle: a cycle of n items always costs exactly n-1 swaps and a chain
     --that ends in a free slot costs its own length, which is the minimum possible number of moves
     PlanItemMoves(itemArray);
-    StartPlan(function() StartSort(true) end);
+end
+
+--pure planning step, kept free of frames/timers so it can run outside the game (e.g. in tests)
+main.sort.ComputePlan = function(bagArray, itemArray)
+    ClearPlan();
+    --merging first, so the stack sizes the sort order depends on are the ones we will actually end up with
+    local mergedArray, mergeMoves = main.index.planStackMerges(itemArray);
+    local sortedArray = main.index.sortItemArray(mergedArray);
+    itemArrayToBags(sortedArray, bagArray, mergeMoves);
+    return movePlan, planLength, sortedArray;
 end
 
 RunSort = function(isVerification)
     if isVerification then
         sortPasses = sortPasses + 1;
         if sortPasses > MAX_SORT_PASSES then
+            trace:AddFormat('STOP: hit the %d pass limit, giving up', MAX_SORT_PASSES);
             sortPasses = 0; --something outside our control keeps changing the bags, give up instead of looping forever
+            main.sort.TraceFinish('hit the maximum number of passes');
             return
         end
     else
         sortPasses = 0;
     end
-    ClearPlan();
     local bagArray, totalSlots = main.index.getBagSlots();
     local itemArray, totalItems = main.index.getItemArrayFromBags(bagArray);
-    --merging first, so the stack sizes the sort order depends on are the ones we will actually end up with
-    local mergedArray, mergeMoves = main.index.planStackMerges(itemArray);
-    local sortedArray = main.index.sortItemArray(mergedArray);
-    itemArrayToBags(sortedArray, bagArray, mergeMoves);
+    if trace:IsActive() then
+        tracePass = tracePass + 1;
+        trace:Add('');
+        trace:AddFormat('=== pass %d (%s) ===', tracePass, isVerification and 'verification' or 'initial');
+        trace:AddFormat('  indexed %d item(s) across %d slot(s)', totalItems, totalSlots);
+        trace:Add('  current bag contents:');
+        for key = 1, #itemArray, 1 do
+            local item = itemArray[key];
+            trace:AddFormat('    [%d,%d] %s x%d (id=%s, maxStack=%s, %s/%s)', item["currentBag"], item["currentSlot"],
+                tostring(item["itemName"]), item["currentStack"], tostring(item["itemID"]),
+                tostring(item["maxStack"]), tostring(item["itemType"]), tostring(item["itemSubType"]));
+        end
+    end
+    main.sort.ComputePlan(bagArray, itemArray);
+    StartPlan(function() StartSort(true) end);
 end
 
 function sort:Sort()
+    StartSort(false);
+end
+
+--called at every point the sort chain can end, so the recorded run can be shown once and only once
+function main.sort.TraceFinish(reason)
+    if not trace:IsActive() then return end
+    trace:Add('');
+    trace:AddFormat('=== finished: %s ===', reason or 'done');
+    trace:Stop();
+    local text = trace:GetText();
+    if main.ui ~= nil and main.ui.ShowDebugDump ~= nil then
+        main.ui:ShowDebugDump(text);
+    end
+end
+
+function sort:DebugSort()
+    trace:Start();
+    tracePass = 0;
+    trace:Add('RetailSort trace');
+    trace:AddFormat('addon version %s, max passes %d, max lock retries %d',
+        tostring(main.version or 'unknown'), MAX_SORT_PASSES, MAX_LOCK_RETRIES);
+    for _, line in ipairs(main.utils.getBagSettingsDump()) do
+        trace:Add(line);
+    end
     StartSort(false);
 end
 

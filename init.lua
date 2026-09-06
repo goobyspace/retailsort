@@ -5,13 +5,14 @@ main.commands = {
     ["sort"] = function()
         main.sort.Sort();
     end,
+    ["debugsort"] = function()
+        print("|cff00cc66Retail Sort:|r recording a sort, the log opens when it finishes.");
+        main.sort.DebugSort();
+    end,
     ["debug"] = function()
         local dump = main.utils.getBagLayoutDebugDump();
         main.ui:ShowDebugDump(dump);
         print("|cff00cc66Retail Sort debug dump opened in a window.|r");
-    end,
-    ["bagdebug"] = function()
-        main.commands.debug();
     end,
     ["restore"] = function()
         main.ui:ShowDebugInput();
@@ -21,8 +22,8 @@ main.commands = {
         print(" ");
         print("Retail Sort Help");
         print("|cff00cc66/retailsort sort|r - sorts your bags");
+        print("|cff00cc66/retailsort debugsort|r - sorts your bags and opens a log of every decision it made");
         print("|cff00cc66/retailsort debug|r - copies the current bag layout to the clipboard");
-        print("|cff00cc66/retailsort restore|r - moves items back into a pasted bag layout (debug)");
         print("|cff00cc66/retailsort config|r - shows config menu");
         print("|cff00cc66/retailsort help|r - shows help info");
         print(" ");
@@ -86,12 +87,6 @@ local function DebugMode(debugMode)
         SLASH_RELOADUI1 = "/rl"; -- For quicker reloading whilst debugg
         SlashCmdList.RELOADUI = ReloadUI;
 
-        SLASH_FRAMESTK1 = "/fs"; -- For quicker access to frame stack
-        SlashCmdList.FRAMESTK = function()
-            LoadAddOn('Blizzard_DebugTools');
-            FrameStackTooltip_Toggle();
-        end
-
         for i = 1, NUM_CHAT_WINDOWS do
             _G["ChatFrame" .. i .. "EditBox"]:SetAltArrowKeyMode(false);
         end
@@ -107,7 +102,7 @@ function main:InitEventHandler(event, name)
     SlashCmdList.QSoundShort = SlashCommandHandler;
     SLASH_QSound1 = "/RetailSort";
     SlashCmdList.QSound = SlashCommandHandler;
-    DebugMode(true);
+    DebugMode(false);
 
     TargetFrame:SetScript("OnEvent", nil);
     TargetFrame:Hide();

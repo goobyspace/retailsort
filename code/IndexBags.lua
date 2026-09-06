@@ -1,13 +1,13 @@
 local _, main = ...;
 main.index = {};
-local c = C_Container;
+local trace = main.trace;
 
 main.index.getBagSlots = function()
     local bagArray = {};
     local totalSlots = 0;
     for bagKey = 0, 4, 1
     do
-        local currentBag = c.GetContainerNumSlots(bagKey);
+        local currentBag = main.wow.GetContainerNumSlots(bagKey);
         local slotArray = {};
         --fill up the bagarray with all the slots, if this is skipped bag will be considered a 0 slot bag
         if main.currentBagSettingArray[bagKey + 1]["ignore"] ~= true then
@@ -23,6 +23,15 @@ main.index.getBagSlots = function()
     end
     return bagArray, totalSlots;
 end
+
+--maps an item's itemType to the bag "type" setting it belongs in, mirrors the mapping used when assigning slots
+local itemTypeToBagType = {
+    ["Quest"] = "Quest",
+    ["Consumable"] = "Consumable",
+    ["Weapon"] = "Equipment",
+    ["Armor"] = "Equipment",
+    ["Trade Goods"] = "Trade Goods",
+};
 
 local function IsMount(itemName)
     --the mount item type isnt for classic era mounts, just for ones like on retail that you 'learn' so we have to check the name
@@ -58,13 +67,13 @@ main.index.getItemArrayFromBags = function(bagArray)
         do
             local currentSlot = slotArray[slotKey]["currentSlot"];
             local currentBag = slotArray[slotKey]["currentBag"];
-            local _, family = c.GetContainerNumFreeSlots(slotArray[slotKey]["currentBag"]);
-            local containerInfo = C_Container.GetContainerItemInfo(currentBag, currentSlot);
+            local _, family = main.wow.GetContainerNumFreeSlots(slotArray[slotKey]["currentBag"]);
+            local containerInfo = main.wow.GetContainerItemInfo(currentBag, currentSlot);
             if containerInfo ~= nil then
                 local itemID = containerInfo["itemID"];
                 itemAmount = itemAmount + 1;
                 local itemName, _, itemRarity, itemLevel, _, itemType, itemSubType, maxStack, _, _, _, e, enum =
-                    C_Item.GetItemInfo(itemID);
+                    main.wow.GetItemInfo(itemID);
                 local newItem = {
                     ["currentSlot"] = currentSlot,
                     ["currentBag"] = currentBag,
@@ -77,7 +86,9 @@ main.index.getItemArrayFromBags = function(bagArray)
                     ["mount"] = IsMount(itemName),
                     ["maxStack"] = maxStack,
                     ["currentStack"] = containerInfo["stackCount"],
-                    ["correctFamily"] = family == C_Item.GetItemFamily(itemID),
+                    ["correctFamily"] = family == main.wow.GetItemFamily(itemID),
+                    ["correctBagType"] = itemTypeToBagType[itemType] ~= nil and
+                        main.currentBagSettingArray[currentBag + 1]["type"] == itemTypeToBagType[itemType],
                 }
                 table.insert(itemArray, newItem);
             end
@@ -123,9 +134,16 @@ main.index.planStackMerges = function(itemArray)
                 end
             end
             if targetKey == nil then
+                trace:AddFormat('  merge: %s x%d at [%d,%d] has no partial stack able to hold it (maxStack=%s)',
+                    tostring(source["itemName"]), source["currentStack"], source["currentBag"], source["currentSlot"],
+                    tostring(source["maxStack"]));
                 break; --nothing can hold the smallest stack, so nothing can hold the bigger ones either
             end
             local target = itemArray[partials[targetKey]];
+            trace:AddFormat('  merge: %s x%d [%d,%d] -> x%d [%d,%d] (maxStack=%s, result x%d)',
+                tostring(source["itemName"]), source["currentStack"], source["currentBag"], source["currentSlot"],
+                target["currentStack"], target["currentBag"], target["currentSlot"],
+                tostring(target["maxStack"]), target["currentStack"] + source["currentStack"]);
             table.insert(moves, {
                 { ["currentBag"] = source["currentBag"], ["currentSlot"] = source["currentSlot"] },
                 { ["currentBag"] = target["currentBag"], ["currentSlot"] = target["currentSlot"] },
@@ -172,14 +190,14 @@ local function CompareItems(item, compareItem)
     --this does not usually matter as generally the first letter is capitalized and nothing else
     --but it might be relevant if there's a multi word item that gets sorted weirdly
     -----------------------------------------------------
-    local itemName, itemType, subType, rarity, mount, family, slot, stack, bag =
+    local itemName, itemType, subType, rarity, mount, family, slot, stack, bag, correctBagType =
         item["itemName"], item["itemType"], item["itemSubType"], item["itemRarity"], item["mount"],
-        item["correctFamily"], item["currentSlot"], item["currentStack"], item["currentBag"];
+        item["correctFamily"], item["currentSlot"], item["currentStack"], item["currentBag"], item["correctBagType"];
     local compareItemName, compareItemType, compareItemSubType, compareItemRarity, compareMount,
-    compareFamily, compareSlot, compareStack, compareBag =
+    compareFamily, compareSlot, compareStack, compareBag, compareCorrectBagType =
         compareItem["itemName"], compareItem["itemType"], compareItem["itemSubType"], compareItem["itemRarity"],
         compareItem["mount"], compareItem["correctFamily"], compareItem["currentSlot"], compareItem["currentStack"],
-        compareItem["currentBag"];
+        compareItem["currentBag"], compareItem["correctBagType"];
     local checkedType = TypeChecker(itemType);
     local checkedCompareType = TypeChecker(compareItemType);
     if compareItemName == "Hearthstone" then
@@ -229,6 +247,11 @@ local function CompareItems(item, compareItem)
                                 if family then
                                     return true;
                                 end
+                            elseif correctBagType ~= compareCorrectBagType then
+                                --identical stacks: keep the one already in its correctly-typed bag there instead of swapping it out
+                                if correctBagType then
+                                    return true;
+                                end
                             elseif bag < compareBag then
                                 return true;
                             end
@@ -259,6 +282,15 @@ main.index.sortItemArray = function(itemArray)
         end
         if sorted == false then
             table.insert(sortedArray, item);
+        end
+    end
+    if trace:IsActive() then
+        trace:Add('  desired order (index -> item, current position):');
+        for key = 1, #sortedArray, 1 do
+            local item = sortedArray[key];
+            trace:AddFormat('    %2d. %s x%d  (now at [%d,%d], id=%s, %s/%s)', key, tostring(item["itemName"]),
+                item["currentStack"], item["currentBag"], item["currentSlot"], tostring(item["itemID"]),
+                tostring(item["itemType"]), tostring(item["itemSubType"]));
         end
     end
     return sortedArray;
