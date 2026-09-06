@@ -104,11 +104,6 @@ function main:InitEventHandler(event, name)
     SlashCmdList.QSound = SlashCommandHandler;
     DebugMode(false);
 
-    TargetFrame:SetScript("OnEvent", nil);
-    TargetFrame:Hide();
-    PlayerFrame:SetScript("OnEvent", nil);
-    PlayerFrame:Hide();
-
     main.ui.MenuInit();
     events:UnregisterEvent("ADDON_LOADED");
 end
