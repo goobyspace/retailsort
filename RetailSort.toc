@@ -1,10 +1,10 @@
 ## Interface: 11509
 ## Title: Retail Sort
 ## Notes: Replicates the retail bag functionality
-## Version: 1.4
+## Version: @project-version@
 ## DefaultState: enabled
 ## SavedVariables: BagSettingArray
-## Author: @Gooby
+## Author: gooby.space
 ## X-Curse-Project-ID: 944346
 ## X-Wago-ID: bGoMzq60
 
