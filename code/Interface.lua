@@ -85,6 +85,8 @@ local function CreateMenu()
                 insets = { left = 4, right = 4, top = 4, bottom = 4 }
             });
         bagFrames[key]["frame"]:SetBackdropColor(0, 0, 0, 0.9);
+        bagFrames[key]["frame"]:SetFrameStrata("TOOLTIP");
+        bagFrames[key]["frame"]:SetToplevel(true);
 
         local optionsLine = bagFrames[key]["frame"]:CreateLine()
         optionsLine:SetColorTexture(0.55, 0.55, 0.55);
@@ -200,7 +202,6 @@ local function CreateMenu()
             end
         end);
         bagFrames[key]["frame"]:SetShown(false);
-        local currentPortrait = ContainerPortraits[key];
         local clickCounter = 0; --displaying the text once would be probably better from a UX standpoint, but this is funny so im keeping it in
         currentPortrait:HookScript("OnClick", function()
             if bagFrames[key]["bagFamily"] ~= 0 then
